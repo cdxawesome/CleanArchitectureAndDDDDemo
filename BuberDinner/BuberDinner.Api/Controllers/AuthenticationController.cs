@@ -1,5 +1,9 @@
-using BuberDinner.Application.Services.Authentication;
+using BuberDinner.Application.Authentication.Commands.Register;
+using BuberDinner.Application.Authentication.Queries.Login;
+using BuberDinner.Application.Services.Authentication.Commands;
+using BuberDinner.Application.Services.Authentication.Queries;
 using BuberDinner.Contracts.Authentication;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BuberDinner.Api.Controllers
@@ -8,23 +12,22 @@ namespace BuberDinner.Api.Controllers
     [Route("auth")]
     public class AuthenticationController : ControllerBase
     {
-        private readonly IAuthenticationService _authenticationService;
+        // private readonly IAuthenticationCommandService _authenticationCommandService;
+        // private readonly IAuthenticationQueryService _authenticationQueryService;
+        private readonly ISender _sender;
 
-        public AuthenticationController(IAuthenticationService authenticationService)
+        public AuthenticationController(ISender ISender)
         {
-            _authenticationService = authenticationService;
+            _sender = ISender;
         }
 
         [HttpPost]
         [Route("register")]
-        public IActionResult Register(RegisterRequest request)
+        public async Task<IActionResult> Register(RegisterRequest request)
         {
-            var authResult = _authenticationService.Register(
-                request.FirstName,
-                request.LastName,
-                request.Email,
-                request.Password
-             );
+            var command = new RegisterCommand(request.FirstName, request.LastName, request.Email, request.Password);
+            var authResult = await _sender.Send(command);
+
             var response = new AuthenticationResponse(
                authResult.user.Id,
                authResult.user.FirstName,
@@ -37,9 +40,9 @@ namespace BuberDinner.Api.Controllers
 
         [HttpPost]
         [Route("login")]
-        public IActionResult Login(LoginRequest request)
+        public async Task<IActionResult> Login(LoginRequest request)
         {
-            var authResult = _authenticationService.Login(request.Email, request.Password);
+            var authResult = await _sender.Send(new LoginQuery(request.Email, request.Password));
             var response = new AuthenticationResponse(
                 authResult.user.Id,
                 authResult.user.FirstName,
