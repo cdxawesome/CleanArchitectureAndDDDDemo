@@ -36,6 +36,7 @@ namespace BuberDinner.Application.Authentication.Queries.Login
             }
             // 3. Create JWT token
             var token = _jwtTokenGenerate.GenerateToken(user);
+            await Task.CompletedTask;
             return new AuthenticationResult(user,
                                             token);
         }
