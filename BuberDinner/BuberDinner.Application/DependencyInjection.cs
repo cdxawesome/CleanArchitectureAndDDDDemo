@@ -1,3 +1,6 @@
+using BuberDinner.Application.Authentication.Commands.Register;
+using BuberDinner.Application.Common.Behaviors;
+using BuberDinner.Application.Services.Authentication.Common;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +16,8 @@ namespace BuberDinner.Application
         {
             // 这里需要添加MediatR.Extensions.Microsoft.DependencyInjection这个包才能实现依赖注入
             services.AddMediatR(typeof(DependencyInjection).Assembly);
+
+            services.AddScoped<IPipelineBehavior<RegisterCommand, AuthenticationResult>, ValidateRegisterCommandBehavior>();
             return services;
         }
     }
